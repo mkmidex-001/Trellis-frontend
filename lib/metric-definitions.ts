@@ -34,6 +34,13 @@ export const SAFE_METRICS = {
   "wallet.connection_success": "Successful wallet connection",
   "wallet.disconnection": "Wallet disconnection",
 
+  // Idempotency (request deduplication, see lib/idempotency.ts)
+  "idempotency.requests": "Idempotent write attempted",
+  "idempotency.hits": "Duplicate submission absorbed by a stored or in-flight result",
+  "idempotency.collisions": "Idempotency key reused for another payload or while in progress",
+  "idempotency.retries": "Idempotent write re-run after a failed or abandoned attempt",
+  "idempotency.expired": "Idempotency key used after its replay window",
+
   // Feature adoption
   "feature.tutorial_started": "User starts tutorial",
   "feature.tutorial_completed": "User completes tutorial",
@@ -75,15 +82,22 @@ export const RETENTION_POLICY = {
  * Check if a metric is safe to record
  */
 export function isMetricSafe(metricName: string): boolean {
-  return metricName in SAFE_METRICS;
+  return Object.prototype.hasOwnProperty.call(SAFE_METRICS, metricName);
 }
 
 /**
  * Check if a field name is safe to include
  */
 export function isFieldSafe(fieldName: string): boolean {
-  const lowerField = fieldName.toLowerCase();
-  return !BLOCKED_FIELDS.some((blocked) => lowerField.includes(blocked));
+  // Treat snake_case, kebab-case and camelCase spellings as the same field so
+  // `apiKey` cannot slip past a block for `api_key`.
+  const canonicalField = fieldName
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  return !BLOCKED_FIELDS.some((blocked) =>
+    canonicalField.includes(blocked.replace(/[^a-z0-9]/gi, "").toLowerCase()),
+  );
 }
 
 /**

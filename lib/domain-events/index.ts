@@ -66,11 +66,33 @@ export {
 } from './registry';
 
 export {
+  buildSnapshot,
+  checkSchemaEvolution,
+  checkVersionChain,
+  describeSchema,
+  diffSchemas,
+  type CompatProblem,
+  type SchemaDescriptor,
+  type SchemaSnapshot,
+} from './compat';
+
+export {
   createBroadcastDelivery,
   createWindowDelivery,
   publishDomainEvent,
   tryPublishDomainEvent,
 } from './emit';
+
+export {
+  DEFAULT_RETRY_POLICY,
+  DLQ_STORAGE_KEY,
+  DeadLetterQueue,
+  computeBackoffMs,
+  deadLetterQueue,
+  type DeadLetterEntry,
+  type DeadLetterInput,
+  type RetryPolicy,
+} from './dlq';
 
 export {
   compareSemver,
